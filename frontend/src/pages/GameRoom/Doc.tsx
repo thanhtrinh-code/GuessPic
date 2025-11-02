@@ -58,6 +58,27 @@ export default function Doc() {
     };
   }, [roomId, state?.clientId, state?.name]);
 
+  /*useEffect(() => {
+    if (!roomId || !state?.clientId || !state?.name) return;
+
+    async function getStateGame() {
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/api/get_state_game/${roomId}`);
+        if (!response.ok) {
+          console.error('Error fetching game state');
+          return;
+        }
+        const data = await response.json();
+        console.log("Initial game state:", data);
+        // You can also update your state here if needed
+        // setGameState(data);
+      } catch (err) {
+        console.error("Failed to fetch game state:", err);
+      }
+    }
+    getStateGame();
+}, [roomId, state?.clientId, state?.name]);*/
+
   return ( 
     <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-purple-50 p-6">
       <div className="max-w-7xl mx-auto">

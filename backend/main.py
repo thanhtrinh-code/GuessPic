@@ -1,10 +1,14 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Request
+from fastapi.responses import JSONResponse
 import uuid
 
 
 from ConnectionManager import ConnectionManager
+from Player import Player
+from PlayerConnection import PlayerConnection
+from GameState import GameState
 import uvicorn
 
 app = FastAPI()
@@ -23,10 +27,9 @@ import json
 async def websocket_endpoint(websocket: WebSocket, roomId: int):
     client_id = websocket.query_params.get("clientId")
     await manager.connect(websocket, roomId, client_id)
-
     try:
         while True:
-            data = await websocket.receive_text()      # data is a string
+            data = await websocket.receive_text()
             message = json.loads(data)
             msg_type = message['type']
             msg = message['data']
@@ -37,61 +40,79 @@ async def websocket_endpoint(websocket: WebSocket, roomId: int):
                 await manager.broadcast_everyone(msg, roomId)
     except WebSocketDisconnect:
         await manager.disconnect_player(websocket, roomId, client_id)
-        
+
+@app.get('/api/get_state_game/{roomId}')
+async def get_state_game(roomId: int):
+    if roomId not in manager.active_connections:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "Room not found"}
+        )
+    
+
+
 @app.post("/api/create_room")
 async def create_room(request: Request):
     data = await request.json()
-    name, room_allowed = data.get("name"), data.get("roomAllowed")
+    name, room_allowed = data.get("name"), int(data.get("roomAllowed"))
     roomId = 100000 + len(manager.active_connections) + 1
     clientId = str(uuid.uuid4())
-
     manager.active_connections[roomId] = {
-                "name": name,
-                "room_allowed": room_allowed,
-                'current_drawer': None,
-                'current_word': None,
-                'round': 0,
-                'game_insession': False,
-                'connections': {
-                    clientId: {
-                        'name': name,
-                        'host': True,
-                        'websocket': None,
-                        'connected': True,
-                        'score': 0,
-                        'is_drawing': False,
-                        'has_guessed': False,
-                        'ready': False,
-                        'correct_guesses': 0,
-                    }
+                "gameState": GameState(
+                    hostname=name,
+                    capacityLimit=room_allowed,
+                    currentDrawer=None,
+                    currentWord=None,
+                    round=0,
+                    gameInsession=False
+                ),
+                "players": {
+                    clientId: Player(
+                        name=name,
+                        host=True,
+                        score=0,
+                        isDrawing=False,
+                        hasGuessed=False,
+                        correctGuesses=0
+                    )
+                },
+                "connections": {
+                    clientId: PlayerConnection(None)
                 }
             }
+
     return { "success": True, "roomId": roomId, "clientId": clientId }
 
 @app.post("/api/join_room")
 async def join_room(request: Request):
     data = await request.json()
-    name, roomId = data.get("name"), data.get("roomId")
+    name, roomId = data.get("name"), int(data.get("roomId"))
     if roomId not in manager.active_connections:
         return { "success": False, "error": "Room does not exist." }
 
 
-    room = manager.active_connections[roomId]
-    if len(room['connections']) >= room['room_allowed']:
+    gameState = manager.active_connections[roomId]['gameState']
+    players = manager.active_connections[roomId]['players']
+    connections = manager.active_connections[roomId]['connections']
+
+    if len(players) >= gameState.capacityLimit:
         return { "success": False, "error": "Room is full." }
     
     clientId = str(uuid.uuid4())
-    room['connections'][clientId] = {
-            'name': name,
-            'host': False,
-            'websocket': None,
-            'connected': True,
-            'score': 0,
-            'is_drawing': False,
-            'has_guessed': False,
-            'ready': False,
-            'correct_guesses': 0,
-        }
+
+
+    if clientId not in players and clientId not in connections:
+        players[clientId] = Player(
+            name=name,
+            host=False,
+            score=0,
+            isDrawing=False,
+            hasGuessed=False,
+            correctGuesses=0
+        )
+        connections[clientId] = PlayerConnection(
+            None
+        )
     return { "success": True, "roomId": roomId, "clientId": clientId }
     
     
