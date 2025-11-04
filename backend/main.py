@@ -55,12 +55,17 @@ async def websocket_endpoint(websocket: WebSocket, roomId: int):
             msg = message['data']
             if msg_type == 'drawing': # This is used in drawer to everyone about current drawing stroke
                 await manager.broadcast_everyone_except(json.dumps(msg), roomId, websocket)
+            elif msg_type == 'clearing':
+                await manager.broadcast_everyone_except(json.dumps(msg), roomId, websocket)
             elif msg_type == 'round_ended': # Drawer to everyone about the current has ended, server respond back
                 await manager.broadcast_everyone(msg, roomId)
             elif msg_type == 'game_start':
                 game_start(roomId)
-                print(manager.active_connections[roomId]['gameState'])
-                pass
+                msg = {
+                    'type': 'game_start',
+                    'gameState': asdict(manager.active_connections[roomId]['gameState'])
+                }
+                await manager.broadcast_everyone(json.dumps(msg), roomId)
             elif msg_type == 'game_ended':
                 pass
             elif msg_type == 'player_answer_correct':
@@ -73,7 +78,7 @@ def game_start(roomId):
     players = manager.active_connections[roomId]['players']
 
     gameState.round += 1
-    gameState.inSession = True
+    gameState.gameInsession = True
     gameState.currentDrawer = random.choice(list(players.keys()))
     category, word = gameDatabase.getCategoryAndWord()
     gameState.currentCategory = category

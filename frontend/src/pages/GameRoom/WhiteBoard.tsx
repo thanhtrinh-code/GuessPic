@@ -5,16 +5,14 @@ interface WhiteBoardProps {
   wsRef: React.RefObject<WebSocket | null>;
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   ctxRef: React.RefObject<CanvasRenderingContext2D | null>;
-  clientId: String | null,
-  currentDrawer: string | undefined,
+  isDrawer: boolean
   gameStart: boolean
 }
 export default function WhiteBoard({
   wsRef,
   canvasRef,
   ctxRef,
-  clientId,
-  currentDrawer,
+  isDrawer,
   gameStart,
 }: WhiteBoardProps) {
     const [isDrawing, setIsDrawing] = React.useState(false);
@@ -89,14 +87,14 @@ export default function WhiteBoard({
     if (!ctx || !canvas) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     wsRef.current?.send(JSON.stringify({
-      type: 'broadcast_everyone_except',
+      type: 'clearing', // Backend handle
       data: {
-        type: 'clear',
+        type: 'clear', // Other clients handle
       }
       }
     ))
   }
-  const isDisabled = !gameStart || clientId !== currentDrawer;
+  const isDisabled = !gameStart || !isDrawer;
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border-2 border-gray-100">
       <div className="bg-gray-300 rounded-xl border-2 border-dashed border-gray-300 aspect-video flex items-center justify-center hover:border-purple-400 transition-colors duration-300">
@@ -105,7 +103,7 @@ export default function WhiteBoard({
             
             ref={canvasRef}
             className={`bg-white rounded-lg shadow-inner cursor-crosshair ${
-              isDisabled ? 'pointer-events-none opacity-50' : ''
+              isDisabled ? 'pointer-events-none opacity-85' : ''
             }`}
             onMouseDown={isDisabled ? undefined : startDrawing}
             onMouseMove={isDisabled ? undefined : draw}
@@ -115,16 +113,20 @@ export default function WhiteBoard({
           </canvas>
         </div>
       </div>
-      <div className="flex gap-3 mt-4 justify-center">
-       <button
-          className="bg-linear-to-r from-purple-500 to-indigo-500 text-white px-6 py-2 rounded-lg font-medium transition duration-200 shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
-          onClick={isDisabled ? undefined : handleClear}
-        >
-          Clear Canvas
-        </button>
+      {isDrawer &&
+          <>
+          <div className="flex gap-3 mt-4 justify-center">
+          <button
+              className="bg-linear-to-r from-purple-500 to-indigo-500 text-white px-6 py-2 rounded-lg font-medium transition duration-200 shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
+              onClick={isDisabled ? undefined : handleClear}
 
-      </div>
-      <ColorPallete setCurrentColor={setCurrentColor} currentColor={currentColor} />
+            >
+              Clear Canvas
+            </button>
+
+          </div>
+          <ColorPallete setCurrentColor={setCurrentColor} currentColor={currentColor} />
+          </>}
     </div>
   );
 }

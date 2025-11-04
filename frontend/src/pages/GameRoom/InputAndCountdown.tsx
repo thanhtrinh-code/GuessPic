@@ -52,14 +52,7 @@ export default function CategoryAndInput({
       </div>
       </div>
 
-      {isDrawer ? (
-        <div className="text-center">
-          <div className="inline-block bg-linear-to-r from-purple-100 to-indigo-100 px-8 py-4 rounded-xl border-2 border-purple-200">
-            <p className="text-sm text-gray-600 mb-2 uppercase tracking-wider">You're Drawing</p>
-            <p className="text-3xl font-bold text-gray-800">{category}</p>
-          </div>
-        </div>
-      ) : (
+      {!isDrawer && (
         <div>
           <div className="flex gap-3">
             <input

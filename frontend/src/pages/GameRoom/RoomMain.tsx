@@ -75,6 +75,18 @@ export default function Doc() {
         })
         setPlayers(playersArr)
         setGameState(gameState)
+      } else if (data.type === 'game_start') {
+        const { hostId, capacityLimit, round, gameInsession, currentDrawer, currentCategory, currentWord } = data.gameState
+        const temp: GameState = {
+          hostId: hostId,
+          capacityLimit: capacityLimit,
+          round: round,
+          gameInsession: gameInsession,
+          currentDrawer: currentDrawer,
+          currentCategory: currentCategory,
+          currentWord: currentWord,
+        }
+        setGameState(temp)
       }
     };
   }, [roomId, state?.clientId, state?.name]);
@@ -89,13 +101,13 @@ export default function Doc() {
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-row justify-between h-full gap-6">
               <div className="flex-1 w-100">
-                <Intro wsRef={wsRef} roomId={roomId} gameStart={gameState.gameInsession} isDrawer={isDrawer} isHost={isHost} />
-                <WhiteBoard wsRef={wsRef} canvasRef={canvasRef} ctxRef={ctxRef} clientId={clientId.current} currentDrawer={gameState.currentDrawer} gameStart={gameState.gameInsession}/>
+                <Intro wsRef={wsRef} roomId={roomId} gameStart={gameState.gameInsession} isDrawer={isDrawer} isHost={isHost} currentCategory={gameState.currentCategory} currentWord={gameState.currentWord}/>
+                <WhiteBoard wsRef={wsRef} canvasRef={canvasRef} ctxRef={ctxRef} isDrawer={isDrawer} gameStart={gameState.gameInsession}/>
                 {gameState.gameInsession && <CategoryAndInput isDrawer={isDrawer} category={gameState.currentCategory} guess={guess} setGuess={setGuess} /> }
               </div>
 
               <div className="w-80">
-                <Profiles players={players} hostId={gameState.hostId} gameStart={gameState.gameInsession} isDrawer={isDrawer}/>
+                <Profiles players={players} hostId={gameState.hostId} gameStart={gameState.gameInsession} currentDrawer={gameState.currentDrawer}/>
               </div>
             </div>
           </div>

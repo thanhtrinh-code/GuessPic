@@ -5,11 +5,10 @@ interface ProfilesProp {
   players: Player[] | null
   hostId: string
   gameStart: boolean
-  isDrawer: boolean
+  currentDrawer: string | undefined
 }
 
-export default function Profiles({ players, hostId, gameStart, isDrawer }: ProfilesProp) {
-
+export default function Profiles({ players, hostId, gameStart, currentDrawer}: ProfilesProp) {
   const safePlayers: Player[] = players ?? [];
   const playersList = gameStart ? [...safePlayers].sort((a, b) => b.score - a.score) : safePlayers;
   return (
@@ -22,8 +21,9 @@ export default function Profiles({ players, hostId, gameStart, isDrawer }: Profi
         {playersList.map((player, index) => {
           const rank = index + 1
           const isTopThree = rank <= 3
+          const isDrawer = player.id === currentDrawer
           return (
-            <Profile key={player.id} player={player} hostId={hostId} gameStart={gameStart} isTopThree={isTopThree} rank={rank} isDrawer={isDrawer}/>
+            <Profile key={player.id} player={player} hostId={hostId} gameStart={gameStart} isTopThree={isTopThree} rank={rank} isDrawer={isDrawer} index={index}/>
           )})}
       </div>
     </div>

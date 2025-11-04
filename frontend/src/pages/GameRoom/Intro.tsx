@@ -3,11 +3,13 @@ interface IntroProps {
   roomId: string | undefined,
   gameStart: boolean,
   isDrawer: boolean,
-  isHost: boolean
+  isHost: boolean,
+  currentWord: string | undefined,
+  currentCategory: string | undefined
 
 }
 
-function Intro ({wsRef, roomId, isHost, gameStart, isDrawer} : IntroProps) {
+function Intro ({wsRef, roomId, isHost, gameStart, isDrawer, currentWord, currentCategory} : IntroProps) {
   function handleStart(e: any) {
     e.preventDefault()
     wsRef.current?.send(JSON.stringify({
@@ -16,6 +18,14 @@ function Intro ({wsRef, roomId, isHost, gameStart, isDrawer} : IntroProps) {
     }))
     console.log('send')
   }
+  const word = currentWord
+    ? currentWord.charAt(0).toUpperCase() + currentWord.slice(1)
+    : '';
+
+  const category = currentCategory
+    ? currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1)
+    : '';
+    
   return (
     <div className="bg-white rounded-2xl shadow-lg px-6 pt-6 pb-3 mb-5 border-2 border-gray-100 hover:shadow-xl transition-shadow duration-300">
       {/* Progress Bar */}
@@ -24,11 +34,11 @@ function Intro ({wsRef, roomId, isHost, gameStart, isDrawer} : IntroProps) {
         gameStart ? (
           isDrawer ? (
             <h2 className="text-2xl font-bold text-center">
-              The word is: <span className="text-purple-600">Mario</span>
+              The word is: <span className="text-purple-600">{word}</span>
             </h2>
           ) : (
             <h2 className="text-2xl font-bold text-center">
-              The category is: <span className="text-purple-600">Video Games</span>
+              The category is: <span className="text-purple-600">{category}</span>
             </h2>
           )
         ) : isHost ? (
