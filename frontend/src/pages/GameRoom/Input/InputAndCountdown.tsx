@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
+import CorrectDisplayer from "./CorrectDisplay";
+import InputForm from "./InputForm";
 
 interface CategoryAndInputProps {
   isDrawer: boolean
   word: string | undefined,
   wsRef: React.RefObject<WebSocket | null>
-
+  clientId: String | null
 }
 
 export default function CategoryAndInput({
   isDrawer,
   word,
   wsRef,
+  clientId
 }: CategoryAndInputProps) {
   const [guess, setGuess] = useState('');
   const [timeLeft, setTimeLeft] = useState(45);
@@ -30,9 +33,35 @@ export default function CategoryAndInput({
       }, 1000);
       return () => clearInterval(timer);
     }, []);
+    useEffect(() => {
+      if (timeLeft == 0) {
+        wsRef.current?.send(JSON.stringify({
+          type: 'round_ended',
+          data: null
+        }))
+      }
+    }, [timeLeft])
   function handleSubmit(e: any) {
     e.preventDefault()
-    
+    if (guess.trim().length == 0) {
+      setGuess('')
+      return
+    }
+    if (!word) {
+      return
+    }
+    if (guess.toUpperCase() === word.toUpperCase()) {
+      const score = timeLeft * 10
+      wsRef.current?.send(JSON.stringify({
+        type: 'answer_correct',
+        data: {
+          'clientId': clientId,
+          'score': score
+        }
+      }));
+      setCorrect(true)
+    }
+    setGuess('')
   }
     
   return (
@@ -57,26 +86,7 @@ export default function CategoryAndInput({
       </div>
       </div>
 
-      {!isDrawer && (
-        <div>
-            <form className="flex gap-3"
-                onSubmit={(e) => handleSubmit(e)}
-            >
-              <input
-                type="text"
-                value={guess}
-                onChange={(e) => setGuess(e.target.value)}
-                placeholder="Type your guess here..."
-                className="flex-1 px-6 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 text-gray-800 placeholder-gray-400"
-              />
-              <button 
-              type='submit'
-              className="bg-linear-to-r from-purple-500 to-indigo-500 text-white px-8 py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-indigo-600 transition-all duration-200 shadow-md hover:shadow-lg">
-                Guess
-              </button>
-            </form>          
-        </div>
-      )}
+      {!isDrawer ? correct ? <CorrectDisplayer/> : <InputForm handleSubmit={handleSubmit} guess={guess} setGuess={setGuess}/> : <></>}
     </div>
   );
 }

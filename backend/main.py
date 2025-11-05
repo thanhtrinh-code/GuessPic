@@ -57,6 +57,22 @@ async def websocket_endpoint(websocket: WebSocket, roomId: int):
                 await manager.broadcast_everyone_except(json.dumps(msg), roomId, websocket)
             elif msg_type == 'clearing':
                 await manager.broadcast_everyone_except(json.dumps(msg), roomId, websocket)
+            elif msg_type == 'answer_correct':
+                clientId, score = msg['clientId'], msg['score']
+                players = manager.active_connections[roomId]['players']
+
+                players[clientId].score += score
+                players[clientId].hasGuessed = True
+
+                gameState = asdict(manager.active_connections[roomId]['gameState'])
+                players = {clientId: asdict(player) for clientId, player in players.items()}
+
+                msg = {
+                    'type': 'update_game',
+                    'gameState': gameState,
+                    'players': players
+                }
+                await manager.broadcast_everyone(json.dumps(msg), roomId)
             elif msg_type == 'round_ended': # Drawer to everyone about the current has ended, server respond back
                 await manager.broadcast_everyone(msg, roomId)
             elif msg_type == 'game_start':
@@ -88,6 +104,7 @@ async def websocket_endpoint(websocket: WebSocket, roomId: int):
             elif msg_type == 'remove_room':
                 await manager.remove_room(roomId)
                 break
+                
     except WebSocketDisconnect:
         await manager.disconnect_player(websocket, roomId, client_id)
 

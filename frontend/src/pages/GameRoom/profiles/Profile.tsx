@@ -1,4 +1,4 @@
-import type { Player } from './dataclass/Dataclasses'
+import type { Player } from '../dataclass/Dataclasses'
 interface ProfileProps {
     player: Player
     hostId: string
@@ -7,6 +7,7 @@ interface ProfileProps {
     rank: number
     isDrawer: boolean
     index: number
+    hasGuessed: boolean
 }
 const colorsBackground: string[] = [
   'bg-red-200',
@@ -19,7 +20,7 @@ const colorsBackground: string[] = [
   'bg-blue-200',
 ];
 
-export default function Profile({player, hostId, gameStart, isTopThree, rank, isDrawer, index} : ProfileProps) {
+export default function Profile({player, hostId, gameStart, isTopThree, rank, isDrawer, index, hasGuessed} : ProfileProps) {
     
     const getMedalIcon = (rank: number) => {
         if (rank === 1) return '🥇';
@@ -32,8 +33,8 @@ export default function Profile({player, hostId, gameStart, isTopThree, rank, is
                     isDrawer && gameStart
                     ? 'bg-linear-to-r from-purple-100 to-indigo-100 border-purple-300 shadow-md scale-[1.02]'
                         : gameStart && isTopThree
-                            ? 'bg-linear-to-r from-amber-50 to-orange-50 border-amber-200 hover:shadow-md'
-                                : `${colorsBackground[index]} border-gray-200 hover:border-purple-200 hover:shadow-sm`
+                            ? 'bg-linear-to-r from-amber-50 to-orange-50 border-amber-200'
+                                : `${colorsBackground[index]}`
                 }`}>
                     {gameStart && 
                         <div className="text-2xl font-bold w-10 text-center text-gray-700">

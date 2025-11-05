@@ -135,14 +135,14 @@ export default function Doc() {
               {!gameState.gameInsession && <BackButton setConfirmationOfClose={setConfirmationOfClose}/>}
 
 
-          
+
             <div className="flex flex-row justify-between h-full gap-6">
               <div className="flex-1 w-100">
                 <Intro wsRef={wsRef} roomId={roomId} gameStart={gameState.gameInsession} isDrawer={isDrawer} isHost={isHost} currentCategory={gameState.currentCategory} currentWord={gameState.currentWord}/>
                 <WhiteBoard wsRef={wsRef} canvasRef={canvasRef} ctxRef={ctxRef} isDrawer={isDrawer} gameStart={gameState.gameInsession}/>
                 
                 {gameState.gameInsession && 
-                  <CategoryAndInput isDrawer={isDrawer} word={gameState.currentWord} wsRef={wsRef} /> 
+                  <CategoryAndInput isDrawer={isDrawer} word={gameState.currentWord} wsRef={wsRef} clientId={clientId.current}/> 
                 }
               </div>
 
