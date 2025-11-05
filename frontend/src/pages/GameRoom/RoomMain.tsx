@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from "react"
 import { useParams, useLocation } from "react-router";
 import {toast} from 'react-toastify'
-import Intro from "./Intro";
-import WhiteBoard from "./WhiteBoard";
-import CategoryAndInput from "./InputAndCountdown";
+import Intro from "./Intro/Intro";
+import WhiteBoard from "./Whiteboard/WhiteBoard";
+import CategoryAndInput from "./Input/InputAndCountdown";
 
-import Profiles from "./Profiles";
-import type { GameState, Player } from "./Dataclasses";
+import Profiles from "./profiles/Profiles";
+import type { GameState, Player } from "./dataclass/Dataclasses";
 import LoadingPage from "../LoadingPage";
-import BackButton from "./BackButton";
-import ConfirmationPage from "./ConfirmationPage";
-import CountDownClose from "./CountDownClose";
-import ClosePlayerPopUp from "./ClosePlayerPopUp";
+import BackButton from "./closePage/BackButton";
+import ConfirmationPage from "./closePage/ConfirmationPage";
+import CountDownClose from "./closePage/CountDownClose";
+import ClosePlayerPopUp from "./closePage/ClosePlayerPopUp";
 
 export default function Doc() {
   const {roomId} = useParams(); // params.roomId will hold the room id from the route (e.g. /:roomId)
@@ -140,7 +140,10 @@ export default function Doc() {
               <div className="flex-1 w-100">
                 <Intro wsRef={wsRef} roomId={roomId} gameStart={gameState.gameInsession} isDrawer={isDrawer} isHost={isHost} currentCategory={gameState.currentCategory} currentWord={gameState.currentWord}/>
                 <WhiteBoard wsRef={wsRef} canvasRef={canvasRef} ctxRef={ctxRef} isDrawer={isDrawer} gameStart={gameState.gameInsession}/>
-                {gameState.gameInsession && <CategoryAndInput isDrawer={isDrawer} /> }
+                
+                {gameState.gameInsession && 
+                  <CategoryAndInput isDrawer={isDrawer} word={gameState.currentWord} wsRef={wsRef} /> 
+                }
               </div>
 
               <div className="w-80">

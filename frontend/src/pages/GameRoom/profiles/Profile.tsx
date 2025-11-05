@@ -1,4 +1,4 @@
-import type { Player } from './Dataclasses'
+import type { Player } from './dataclass/Dataclasses'
 interface ProfileProps {
     player: Player
     hostId: string

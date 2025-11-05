@@ -1,4 +1,4 @@
-import type { Player } from "./Dataclasses";
+import type { Player } from "./dataclass/Dataclasses";
 import Profile from "./Profile";
 
 interface ProfilesProp {
