@@ -11,10 +11,12 @@ export default function ConfirmationPage({setConfirmationOfClose, wsRef, isHost,
     const navigate = useNavigate()
     function handleClose() {
         if (isHost) {
+            console.log('close')
             wsRef.current?.send(JSON.stringify({
                 type: 'host_close',
                 data: null
             }))
+            
         } else {
             wsRef.current?.send(JSON.stringify({
                 type: 'player_close',

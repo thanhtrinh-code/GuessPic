@@ -23,7 +23,16 @@ export default function Profiles({ players, hostId, gameStart, currentDrawer}: P
           const isTopThree = rank <= 3
           const isDrawer = player.id === currentDrawer
           return (
-            <Profile key={player.id} player={player} hostId={hostId} gameStart={gameStart} isTopThree={isTopThree} rank={rank} isDrawer={isDrawer} index={index} hasGuessed={player.hasGuessed}/>
+            <Profile key={player.id} 
+            player={player} 
+            hostId={hostId} 
+            gameStart={gameStart} 
+            isTopThree={isTopThree} 
+            rank={rank} 
+            isDrawer={isDrawer} 
+            index={index} 
+            hasGuessed={player.hasGuessed}
+            />
           )})}
       </div>
     </div>

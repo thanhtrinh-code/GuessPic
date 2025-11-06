@@ -4,18 +4,15 @@ export default function CountDownClose() {
     const [timer, setTimer] = useState(5)
     const navigate = useNavigate()
     useEffect(() => {
+        if (timer == 0) {
+            navigate('/')
+        }
         const interval = setInterval(() => {
-            setTimer(prev => {
-                if (prev <= 1) {
-                    clearInterval(interval)
-                    navigate('/')  // redirect immediately
-                    return 0
-                }
-                return prev - 1
-            })
-        }, 1000)
+            setTimer(prev => prev - 1)
+        }, 1000);
+        
         return () => clearInterval(interval)
-    }, [navigate])
+    }, [navigate, timer])
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800/40 z-50">

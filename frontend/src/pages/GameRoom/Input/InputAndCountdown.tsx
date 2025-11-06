@@ -16,9 +16,9 @@ export default function CategoryAndInput({
   clientId
 }: CategoryAndInputProps) {
   const [guess, setGuess] = useState('');
-  const [timeLeft, setTimeLeft] = useState(45);
+  const [timeLeft, setTimeLeft] = useState(10);
   const [correct, setCorrect] = useState(false)
-  const totalTime = 45;
+  const totalTime = 10;
   const percentage = (timeLeft / totalTime) * 100;
     
     useEffect(() => {
@@ -39,6 +39,7 @@ export default function CategoryAndInput({
           type: 'round_ended',
           data: null
         }))
+        console.log("send round close")
       }
     }, [timeLeft])
   function handleSubmit(e: any) {

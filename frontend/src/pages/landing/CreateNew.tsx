@@ -52,6 +52,11 @@ export default function CreateNew({
         });
         const data = await response.json();
         if (data.success) {
+          localStorage.setItem('roomData', JSON.stringify({
+            roomId: data.roomId,
+            clientId: data.clientId,
+            name: name
+          }))
           navigate(`/room/${data.roomId}`, {
             state: {
               clientId: data.clientId,
@@ -108,7 +113,7 @@ export default function CreateNew({
 
             <button
               onClick={(e) => handleCreateNew(e)}
-              className="w-full bg-linear-to-r from-purple-600 to-indigo-600 text-white font-semibold py-3 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
+              className="w-full bg-purple-600 text-white font-semibold py-3 rounded-xl hover:bg-purple-700 transition-colors duration-200 shadow-md hover:shadow-lg"
             >
               🎨 Create Room
             </button>

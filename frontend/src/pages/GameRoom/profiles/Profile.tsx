@@ -20,8 +20,14 @@ const colorsBackground: string[] = [
   'bg-blue-200',
 ];
 
-export default function Profile({player, hostId, gameStart, isTopThree, rank, isDrawer, index, hasGuessed} : ProfileProps) {
-    
+export default function Profile({
+    player, 
+    hostId, 
+    gameStart, 
+    isTopThree, 
+    rank, 
+    isDrawer, 
+    index, hasGuessed} : ProfileProps) {
     const getMedalIcon = (rank: number) => {
         if (rank === 1) return '🥇';
         if (rank === 2) return '🥈';
@@ -29,13 +35,16 @@ export default function Profile({player, hostId, gameStart, isTopThree, rank, is
         return `#${rank}`;
     };
   return (
-    <div className={`p-4 rounded-xl border transition-all duration-200 flex items-center gap-3 ${
+    <div className={`p-4 rounded-xl border transition-all duration-200 flex items-center gap-3 
+                ${
                     isDrawer && gameStart
-                    ? 'bg-linear-to-r from-purple-100 to-indigo-100 border-purple-300 shadow-md scale-[1.02]'
+                        ? hasGuessed
+                        ? 'bg-linear-to-r from-purple-100 to-indigo-100 border-4 border-green-500 shadow-[0_0_12px_rgba(34,197,94,0.6)] scale-[1.02]'
+                        : 'bg-linear-to-r from-purple-100 to-indigo-100 border-purple-300 shadow-md scale-[1.02]'
                         : gameStart && isTopThree
-                            ? 'bg-linear-to-r from-amber-50 to-orange-50 border-amber-200'
-                                : `${colorsBackground[index]}`
-                }`}>
+                        ? 'bg-linear-to-r from-amber-50 to-orange-50 border-amber-200'
+                        : `${colorsBackground[index]}`
+                    }`}>
                     {gameStart && 
                         <div className="text-2xl font-bold w-10 text-center text-gray-700">
                             {getMedalIcon(rank)}

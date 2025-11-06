@@ -30,13 +30,21 @@ export default function Doc() {
 
 
   useEffect(() => {
-    if (!roomId || !state?.clientId || !state?.name) {
+    clientId.current = state?.clientId;
+    let clientName = state?.name;
+
+    if (!clientId.current || !clientName) {
+      const getFromLocal = localStorage.getItem('roomData')
+      if (getFromLocal) {
+        const parsed = JSON.parse(getFromLocal)
+        clientId.current = parsed.clientId;
+        clientName = parsed.name;
+      }
+    }
+    if (!roomId || !clientId.current || !clientName) {
       console.error("Missing roomId, clientId, or name");
       return;
     }
-    clientId.current = state.clientId;
-
-    const clientName = state.name;
 
     // Connect websocket
     const ws = new WebSocket(
@@ -57,7 +65,7 @@ export default function Doc() {
         if (!ctx) return
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       } else if (data.type === 'draw') {
-        const {prevX, prevY, currX, currY, color, lineWidth} = data;
+        const {prevX, prevY, currX, currY, color, lineWidth} = data.data;
         if (!ctx) return
         ctx.strokeStyle = color;
         ctx.lineWidth = lineWidth;
@@ -66,10 +74,12 @@ export default function Doc() {
         ctx.lineTo(currX, currY);
         ctx.stroke();
       } else if (data.type === 'update_game') {
-        const {gameState, players} = data
+        const dataGameState = data.gameState
+        const dataPlayer = data.players
+        console.log(data)
         let playersArr: Player[] = []
-        Object.keys(players).forEach(clientId => {
-          const {name, score, hasGuessed, correctGuesses} = players[clientId]
+        Object.keys(dataPlayer).forEach(clientId => {
+          const {name, score, hasGuessed, correctGuesses} = dataPlayer[clientId]
           const player: Player = {
             id: clientId,
             name: name,
@@ -79,10 +89,11 @@ export default function Doc() {
           }
           playersArr.push(player)
         })
+
         setPlayers(playersArr)
-        setGameState(gameState)
+        setGameState(dataGameState)
       } else if (data.type === 'game_start') {
-        const { hostId, capacityLimit, round, gameInsession, currentDrawer, currentCategory, currentWord } = data.gameState
+        const {hostId, capacityLimit, round, gameInsession, currentDrawer, currentCategory, currentWord } = data.gameState
         const temp: GameState = {
           hostId: hostId,
           capacityLimit: capacityLimit,
@@ -94,10 +105,13 @@ export default function Doc() {
         }
         setGameState(temp)
       } else if (data.type === 'player_close') {
-        const {gameState, players, closePlayer} = data
+        const dataGameState = data.gameState;
+        const dataPlayer = data.players;
+        const closePlayer = data.closePlayer;
+
         let playersArr: Player[] = []
-        Object.keys(players).forEach(clientId => {
-          const {name, score, hasGuessed, correctGuesses} = players[clientId]
+        Object.keys(dataPlayer).forEach(clientId => {
+          const {name, score, hasGuessed, correctGuesses} = dataPlayer[clientId]
           const player: Player = {
             id: clientId,
             name: name,
@@ -108,7 +122,7 @@ export default function Doc() {
           playersArr.push(player)
         })
         setPlayers(playersArr)
-        setGameState(gameState)
+        setGameState(dataGameState)
         toast.info(`${closePlayer} has left the room`);
       } else if (data.type === 'host_close') {
         wsRef.current?.send(JSON.stringify({
@@ -119,7 +133,26 @@ export default function Doc() {
       }
     };
   }, [roomId, state?.clientId, state?.name]);
-  
+  useEffect(() => {
+    // Add a fake state so that the next "Back" triggers popstate
+    window.history.pushState(null, '', window.location.href)
+
+    const handleBackState = (e: PopStateEvent) => {
+      e.preventDefault()
+      setConfirmationOfClose(true)
+
+      // Push the state again so pressing Back again re-triggers popstate
+      // (prevent leaving the page)
+      window.history.pushState(null, '', window.location.href)
+    }
+
+    window.addEventListener('popstate', handleBackState)
+
+    return () => {
+      window.removeEventListener('popstate', handleBackState)
+    }
+  }, [])
+    
 
   const isDrawer = clientId.current === gameState?.currentDrawer
   const isHost = clientId.current === gameState?.hostId

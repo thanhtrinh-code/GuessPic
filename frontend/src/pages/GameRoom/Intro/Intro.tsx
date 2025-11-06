@@ -16,7 +16,6 @@ function Intro ({wsRef, roomId, isHost, gameStart, isDrawer, currentWord, curren
       type: 'game_start',
       data: null
     }))
-    console.log('send')
   }
   const word = currentWord
     ? currentWord.charAt(0).toUpperCase() + currentWord.slice(1)

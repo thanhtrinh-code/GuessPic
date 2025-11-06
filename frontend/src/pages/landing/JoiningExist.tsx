@@ -57,6 +57,11 @@ export default function JoiningExist({
 
       const data = await response.json();
       if (data?.success === true) {
+        localStorage.setItem('roomData', JSON.stringify({
+            roomId: data.roomId,
+            clientId: data.clientId,
+            name: name
+          }))
         navigate(`/room/${roomId}`, {
           state: {
             clientId: data.clientId,
@@ -114,7 +119,7 @@ export default function JoiningExist({
 
             <button
               onClick={(e) => handleJoinExisting(e)}
-              className="w-full bg-linear-to-r from-purple-600 to-indigo-600 text-white font-semibold py-3 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
+              className="w-full bg-purple-600 text-white font-semibold py-3 rounded-xl hover:bg-purple-700 transition-colors duration-200 shadow-md hover:shadow-lg"
             >
               🚪 Join Room
             </button>

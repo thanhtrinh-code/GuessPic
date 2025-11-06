@@ -26,6 +26,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 import json
 @app.websocket("/ws/{roomId}")
 async def websocket_endpoint(websocket: WebSocket, roomId: int):
@@ -34,7 +35,6 @@ async def websocket_endpoint(websocket: WebSocket, roomId: int):
     players = manager.active_connections[roomId]['players']
     gameState = manager.active_connections[roomId]['gameState']
     
-
     # Convert to Json
     players_dict = {clientId: asdict(player) for clientId, player in players.items()}
     game_state_dict = asdict(gameState)
@@ -74,7 +74,16 @@ async def websocket_endpoint(websocket: WebSocket, roomId: int):
                 }
                 await manager.broadcast_everyone(json.dumps(msg), roomId)
             elif msg_type == 'round_ended': # Drawer to everyone about the current has ended, server respond back
-                await manager.broadcast_everyone(msg, roomId)
+                round_reset(roomId)
+                gameState = asdict(manager.active_connections[roomId]['gameState'])
+                players = {clientId: asdict(player) for clientId, player in players.items()}
+                msg = {
+                    'type': 'update_game',
+                    'gameState': gameState,
+                    'players': players
+                }
+                print(msg)
+                await manager.broadcast_everyone(json.dumps(msg), roomId)
             elif msg_type == 'game_start':
                 game_start(roomId)
                 msg = {
@@ -107,6 +116,17 @@ async def websocket_endpoint(websocket: WebSocket, roomId: int):
                 
     except WebSocketDisconnect:
         await manager.disconnect_player(websocket, roomId, client_id)
+
+def round_reset(roomId):
+    if roomId not in manager.active_connections:
+        return
+    gameState = manager.active_connections[roomId]['gameState']
+
+    
+    gameState.gameInsession = False
+    gameState.currentCategory = None
+    gameState.currentWord = None
+    gameState.currentDrawer = None
 
 def game_start(roomId):
     import random
